@@ -43,12 +43,12 @@ const steps = [
 
 const plans = [
   {
-    name: 'Starter',
-    price: '149.000',
+    name: 'Bulanan',
+    price: '50.000',
     period: '/bulan',
-    desc: 'Cocok untuk laundry rumahan atau baru buka',
+    desc: 'Cocok untuk coba dulu tanpa komitmen panjang',
     features: [
-      '2 akun kasir',
+      'Unlimited akun kasir',
       'Semua fitur order & tracking',
       'Dashboard analitik harian',
       'Kelola layanan & harga',
@@ -56,36 +56,39 @@ const plans = [
     ],
     cta: 'Mulai Sekarang',
     highlight: false,
+    badge: null,
   },
   {
-    name: 'Pro',
-    price: '299.000',
-    period: '/bulan',
-    desc: 'Untuk laundry yang sudah berkembang',
+    name: 'Tahunan',
+    price: '500.000',
+    period: '/tahun',
+    desc: 'Hemat Rp 100.000 dibanding bayar bulanan',
     features: [
       'Unlimited akun kasir',
-      'Semua fitur Starter',
-      'Multi outlet (segera hadir)',
-      'Laporan pendapatan bulanan',
+      'Semua fitur order & tracking',
+      'Dashboard analitik harian',
+      'Kelola layanan & harga',
       'Priority support',
     ],
-    cta: 'Pilih Pro',
+    cta: 'Pilih Tahunan',
     highlight: true,
+    badge: '⭐ PALING POPULER',
   },
   {
-    name: 'Lifetime',
-    price: '1.999.000',
-    period: '/sekali bayar',
-    desc: 'Bayar sekali, pakai selamanya',
+    name: '2 Tahun',
+    price: '800.000',
+    period: '/2 tahun',
+    desc: 'Hemat Rp 400.000 dibanding bayar bulanan',
     features: [
       'Unlimited akun kasir',
-      'Semua fitur Pro',
-      'Update fitur gratis selamanya',
-      'Onboarding & setup gratis',
-      'Dedicated support',
+      'Semua fitur order & tracking',
+      'Dashboard analitik harian',
+      'Kelola layanan & harga',
+      'Priority support',
     ],
-    cta: 'Beli Lifetime',
+    cta: 'Pilih 2 Tahun',
     highlight: false,
+    badge: '🔥 PALING HEMAT',
   },
 ]
 
@@ -299,9 +302,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
               <div key={i} className={`rounded-2xl p-6 border-2 relative ${plan.highlight ? 'border-blue-600 bg-blue-600 text-white shadow-xl shadow-blue-200' : 'border-gray-200 bg-white'}`}>
-                {plan.highlight && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1 rounded-full">
-                    ⭐ PALING POPULER
+                {plan.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+                    {plan.badge}
                   </div>
                 )}
                 <div className={`text-sm font-medium mb-1 ${plan.highlight ? 'text-blue-200' : 'text-gray-500'}`}>{plan.name}</div>
@@ -324,7 +327,7 @@ export default function LandingPage() {
                 <a href={`https://wa.me/6282153533164?text=Halo,%20saya%20mau%20berlangganan%20Z%20Laundry%20paket%20${plan.name}`}
                   target="_blank" rel="noopener noreferrer"
                   className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${plan.highlight ? 'bg-white text-blue-600 hover:bg-blue-50' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
-                  {plan.cta}
+                  {plan.cta} →
                 </a>
               </div>
             ))}
