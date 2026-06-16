@@ -131,7 +131,7 @@ export default function LandingPage() {
               className="text-sm px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
               Masuk
             </Link>
-            <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20tahu%20lebih%20lanjut%20tentang%20Z%20Laundry"
+            <a href="https://wa.me/6282153533164?text=Halo,%20saya%20ingin%20tahu%20lebih%20lanjut%20tentang%20Z%20Laundry"
               target="_blank" rel="noopener noreferrer"
               className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               Hubungi Kami
@@ -161,7 +161,7 @@ export default function LandingPage() {
               className="px-8 py-3.5 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-colors text-sm">
               Lihat Paket Harga →
             </a>
-            <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20coba%20demo%20Z%20Laundry"
+            <a href="https://wa.me/6282153533164?text=Halo,%20saya%20ingin%20coba%20demo%20Z%20Laundry"
               target="_blank" rel="noopener noreferrer"
               className="px-8 py-3.5 bg-white/10 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors text-sm">
               Coba Demo Gratis
@@ -321,7 +321,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <a href={`https://wa.me/6281234567890?text=Halo,%20saya%20mau%20berlangganan%20Z%20Laundry%20paket%20${plan.name}`}
+                <a href={`https://wa.me/6282153533164?text=Halo,%20saya%20mau%20berlangganan%20Z%20Laundry%20paket%20${plan.name}`}
                   target="_blank" rel="noopener noreferrer"
                   className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${plan.highlight ? 'bg-white text-blue-600 hover:bg-blue-50' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
                   {plan.cta}
@@ -329,7 +329,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="text-center text-sm text-gray-400 mt-6">Butuh paket khusus untuk banyak outlet? <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Hubungi kami</a></p>
+          <p className="text-center text-sm text-gray-400 mt-6">Butuh paket khusus untuk banyak outlet? <a href="https://wa.me/6282153533164" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Hubungi kami</a></p>
         </div>
       </section>
 
@@ -365,7 +365,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-3">Siap Rapikan Bisnis Laundry Kamu?</h2>
           <p className="text-blue-100 mb-8">Mulai dengan demo gratis 7 hari. Tidak perlu kartu kredit, tidak ada syarat tersembunyi.</p>
-          <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20coba%20demo%20gratis%20Z%20Laundry"
+          <a href="https://wa.me/6282153533164?text=Halo,%20saya%20ingin%20coba%20demo%20gratis%20Z%20Laundry"
             target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors text-sm">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
