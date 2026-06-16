@@ -27,7 +27,7 @@ export default function Sidebar() {
             <span className="text-white text-lg">🧺</span>
           </div>
           <div>
-            <div className="font-semibold text-gray-900 text-sm">LaundryKas</div>
+            <div className="font-semibold text-gray-900 text-sm">Z Laundry</div>
             <div className="text-xs text-gray-400">POS Laundry</div>
           </div>
         </div>

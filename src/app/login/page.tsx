@@ -39,7 +39,7 @@ export default function LoginPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900">LaundryKas</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Z Laundry</h1>
           <p className="text-sm text-gray-500 mt-1">Masuk ke akun kasir kamu</p>
         </div>
 
@@ -84,7 +84,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          LaundryKas © 2026
+          Z Laundry © 2026
         </p>
       </div>
     </div>
