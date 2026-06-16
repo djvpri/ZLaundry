@@ -1,6 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
 import './globals.css'
-import { SessionProvider } from 'next-auth/react'
+import { Providers } from './providers'
+
+export const metadata: Metadata = {
+  title: 'LaundryKas',
+  description: 'POS Laundry Management System',
+}
 
 export default function RootLayout({
   children,
@@ -10,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body>
-        <SessionProvider>{children}</SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
