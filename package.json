@@ -1,0 +1,33 @@
+{
+  "name": "laundrykas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "^18",
+    "react-dom": "^18",
+    "next-auth": "^4.24.7",
+    "@prisma/client": "^5.16.1",
+    "bcryptjs": "^2.4.3",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.16.1",
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/bcryptjs": "^2.4.6",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
+    "autoprefixer": "^10"
+  }
+}

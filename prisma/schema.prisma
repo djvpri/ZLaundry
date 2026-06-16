@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(KASIR)
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Service {
+  id          String      @id @default(cuid())
+  name        String
+  type        ServiceType
+  pricePerKg  Int?
+  priceFlat   Int?
+  unit        String?
+  isActive    Boolean     @default(true)
+  orders      Order[]
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber Int         @default(autoincrement())
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  customerId  String
+  service     Service     @relation(fields: [serviceId], references: [id])
+  serviceId   String
+  kasir       User        @relation(fields: [kasirId], references: [id])
+  kasirId     String
+  weight      Float?
+  quantity    Int?
+  totalPrice  Int
+  status      OrderStatus @default(MASUK)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  dueDate     DateTime?
+}
+
+enum Role {
+  ADMIN
+  KASIR
+}
+
+enum ServiceType {
+  PER_KG
+  SATUAN
+}
+
+enum OrderStatus {
+  MASUK
+  PROSES
+  SELESAI
+  DIAMBIL
+}
