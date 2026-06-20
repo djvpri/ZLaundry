@@ -23,7 +23,6 @@ export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
-  const [sendingWA, setSendingWA] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     customerName: '', customerPhone: '', serviceId: '',
@@ -90,18 +89,6 @@ export default function OrdersPage() {
 
   function handlePrintNota(orderId: string) {
     window.open(`/api/orders/${orderId}/nota`, '_blank')
-  }
-
-  async function handleSendWA(orderId: string) {
-    setSendingWA(orderId)
-    const res = await fetch(`/api/orders/${orderId}/send-wa`, { method: 'POST' })
-    const data = await res.json()
-    setSendingWA(null)
-    if (res.ok) {
-      alert('WhatsApp terkirim! ✓')
-    } else {
-      alert(data.error || 'Gagal kirim WhatsApp')
-    }
   }
 
   const statusCount = (s: string) => orders.filter(o => s === 'SEMUA' || o.status === s).length
@@ -257,14 +244,6 @@ export default function OrdersPage() {
                         title="Cetak Nota PDF"
                       >
                         🖨️
-                      </button>
-                      <button
-                        onClick={() => handleSendWA(order.id)}
-                        disabled={sendingWA === order.id}
-                        className="btn-secondary text-xs py-1 px-2"
-                        title="Kirim WA ke pelanggan"
-                      >
-                        {sendingWA === order.id ? '...' : '📱'}
                       </button>
                       {order.status === 'DIAMBIL' && (
                         <span className="text-xs text-green-500 font-medium">✓</span>

@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/log-activity'
-import { sendWhatsAppStatus } from '@/lib/fonnte'
 
 export async function PATCH(
   req: NextRequest,
@@ -27,9 +26,6 @@ export async function PATCH(
   })
 
   await logActivity(session.user.id as string, 'UPDATE_STATUS', `Order #${order.orderNumber} → ${status}`)
-
-  // Kirim WA notifikasi (async, don't block response)
-  sendWhatsAppStatus(order as any).catch(console.error)
 
   return NextResponse.json(order)
 }

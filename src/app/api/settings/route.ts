@@ -4,8 +4,6 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 const DEFAULT_SETTINGS = [
-  { key: 'fonnte_token', value: '' },
-  { key: 'wa_admin_number', value: '' },
   { key: 'laundry_name', value: 'Z Laundry' },
   { key: 'laundry_address', value: '' },
   { key: 'laundry_phone', value: '' },
