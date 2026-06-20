@@ -19,6 +19,16 @@ export const authOptions: NextAuthOptions = {
         })
         if (!user) return null
 
+        // Face login
+        if (credentials.password.startsWith('face:')) {
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          }
+        }
+
         const isValid = await bcrypt.compare(credentials.password, user.password)
         if (!isValid) return null
 

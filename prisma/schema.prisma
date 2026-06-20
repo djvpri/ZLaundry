@@ -12,6 +12,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  faceId    String?  @unique
   role      Role     @default(KASIR)
   createdAt DateTime @default(now())
   orders    Order[]

@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@prisma/client": "^5.16.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.6.0",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "next": "^14.2.35",
     "next-auth": "^4.24.7",
