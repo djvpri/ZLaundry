@@ -7,6 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tenant {
+  id          String   @id @default(cuid())
+  namaToko    String
+  slug        String   @unique
+  alamat      String?
+  telepon     String?
+  plan        String   @default("free")
+  planExpires DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+  customers   Customer[]
+  orders      Order[]
+
+  @@index([slug])
+}
+
 model User {
   id        String        @id @default(cuid())
   name      String
@@ -14,6 +32,8 @@ model User {
   password  String
   faceId    String?       @unique
   role      Role          @default(KASIR)
+  tenantId  String?
+  tenant    Tenant?       @relation(fields: [tenantId], references: [id])
   createdAt DateTime      @default(now())
   orders    Order[]
   logs      ActivityLog[]
@@ -23,6 +43,8 @@ model Customer {
   id        String   @id @default(cuid())
   name      String
   phone     String
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
   createdAt DateTime @default(now())
   orders    Order[]
 }
@@ -47,6 +69,8 @@ model Order {
   serviceId   String
   kasir       User        @relation(fields: [kasirId], references: [id])
   kasirId     String
+  tenantId    String?
+  tenant      Tenant?     @relation(fields: [tenantId], references: [id])
   weight      Float?
   quantity    Int?
   totalPrice  Int

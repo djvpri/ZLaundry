@@ -18,24 +18,25 @@ export async function GET(req: NextRequest) {
         email: true,
         role: true,
         faceId: true,
+        tenantId: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
     })
 
-    // Get plan info
-    const planSetting = await prisma.setting.findUnique({ where: { key: 'plan' } })
-    const plans = await prisma.plan.findMany({ orderBy: { urutan: 'asc' } })
-    const currentPlan = plans.find(p => p.id === (planSetting?.value || 'free')) || plans[0]
-
-    return NextResponse.json({
-      users,
-      plan: {
-        current: planSetting?.value || 'free',
-        info: currentPlan || null,
-        available: plans,
+    const tenants = await prisma.tenant.findMany({
+      select: {
+        id: true,
+        namaToko: true,
+        slug: true,
+        plan: true,
+        planExpires: true,
+        isActive: true,
       },
+      orderBy: { createdAt: 'desc' },
     })
+
+    return NextResponse.json({ users, tenants })
   } catch (error) {
     console.error('Cross-app list users error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -51,16 +52,66 @@ export async function POST(req: NextRequest) {
 
     const { action, email, data } = await req.json()
 
+    // --- Tenant actions (no user lookup needed) ---
+    switch (action) {
+      case 'createTenant': {
+        if (!data?.namaToko || !data?.slug) {
+          return NextResponse.json({ error: 'namaToko & slug wajib' }, { status: 400 })
+        }
+        const existing = await prisma.tenant.findUnique({ where: { slug: data.slug } })
+        if (existing) return NextResponse.json({ error: 'Slug sudah dipakai' }, { status: 409 })
+        const tenant = await prisma.tenant.create({
+          data: { namaToko: data.namaToko, slug: data.slug, plan: data.plan || 'free' },
+          select: { id: true, namaToko: true, slug: true, plan: true },
+        })
+        return NextResponse.json({ success: true, tenant }, { status: 201 })
+      }
+      case 'updateTenant': {
+        if (!data?.tenantId) return NextResponse.json({ error: 'tenantId wajib' }, { status: 400 })
+        await prisma.tenant.update({
+          where: { id: data.tenantId },
+          data: {
+            namaToko: data.namaToko || undefined,
+            slug: data.slug || undefined,
+            isActive: data.isActive ?? undefined,
+            alamat: data.alamat || undefined,
+            telepon: data.telepon || undefined,
+          },
+        })
+        return NextResponse.json({ success: true })
+      }
+      case 'deleteTenant': {
+        if (!data?.tenantId) return NextResponse.json({ error: 'tenantId wajib' }, { status: 400 })
+        // Cascade delete all related data
+        await prisma.order.deleteMany({ where: { tenantId: data.tenantId } })
+        await prisma.activityLog.deleteMany({ where: { user: { tenantId: data.tenantId } } })
+        await prisma.customer.deleteMany({ where: { tenantId: data.tenantId } })
+        await prisma.user.deleteMany({ where: { tenantId: data.tenantId } })
+        await prisma.tenant.delete({ where: { id: data.tenantId } })
+        return NextResponse.json({ success: true })
+      }
+      case 'updatePlan': {
+        if (!data?.tenantId || !data?.plan) return NextResponse.json({ error: 'tenantId & plan wajib' }, { status: 400 })
+        const validPlans = ['free', 'pro']
+        if (!validPlans.includes(data.plan)) {
+          return NextResponse.json({ error: `Plan tidak valid: ${data.plan}` }, { status: 400 })
+        }
+        await prisma.tenant.update({
+          where: { id: data.tenantId },
+          data: { plan: data.plan, planExpires: data.planExpires ? new Date(data.planExpires) : null },
+        })
+        return NextResponse.json({ success: true })
+      }
+    }
+
+    // --- User actions (need user lookup) ---
     switch (action) {
       case 'create': {
         if (!data?.name || !data?.email || !data?.password) {
           return NextResponse.json({ error: 'name, email, password wajib' }, { status: 400 })
         }
-
-        const existing = await prisma.user.findUnique({ where: { email: data.email } })
-        if (existing) {
-          return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 })
-        }
+        const dup = await prisma.user.findUnique({ where: { email: data.email } })
+        if (dup) return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 })
 
         const hashed = await bcrypt.hash(data.password, 10)
         const user = await prisma.user.create({
@@ -69,13 +120,12 @@ export async function POST(req: NextRequest) {
             email: data.email,
             password: hashed,
             role: data.role || 'KASIR',
+            tenantId: data.tenantId || undefined,
           },
           select: { id: true, name: true, email: true, role: true },
         })
-
         return NextResponse.json({ success: true, user }, { status: 201 })
       }
-
       default: {
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -84,33 +134,19 @@ export async function POST(req: NextRequest) {
           case 'updateRole':
             await prisma.user.update({ where: { email }, data: { role: data.role } })
             return NextResponse.json({ success: true })
-
-          case 'updatePlan':
-            // ZLaundry is single-tenant — plan is global setting
-            const validPlans = await prisma.plan.findMany({ select: { id: true } })
-            const planIds = validPlans.map(p => p.id)
-            if (!planIds.includes(data.plan)) {
-              return NextResponse.json({ error: `Plan tidak valid: ${data.plan}` }, { status: 400 })
-            }
-            await prisma.setting.upsert({
-              where: { key: 'plan' },
-              create: { key: 'plan', value: data.plan },
-              update: { value: data.plan },
-            })
-            return NextResponse.json({ success: true })
-
-          case 'resetPassword':
+          case 'resetPassword': {
             if (!data.password || data.password.length < 6) {
               return NextResponse.json({ error: 'Password min 6 karakter' }, { status: 400 })
             }
             const hashed = await bcrypt.hash(data.password, 10)
             await prisma.user.update({ where: { email }, data: { password: hashed } })
             return NextResponse.json({ success: true })
-
+          }
           case 'delete':
+            await prisma.activityLog.deleteMany({ where: { userId: user.id } })
+            await prisma.order.deleteMany({ where: { kasirId: user.id } })
             await prisma.user.delete({ where: { email } })
             return NextResponse.json({ success: true })
-
           default:
             return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
         }

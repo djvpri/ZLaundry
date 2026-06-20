@@ -6,6 +6,19 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding database...')
 
+  // Default tenant
+  const tenant = await prisma.tenant.upsert({
+    where: { slug: 'laundrykas' },
+    update: {},
+    create: {
+      namaToko: 'LaundryKas',
+      slug: 'laundrykas',
+      plan: 'free',
+      isActive: true,
+    },
+  })
+  console.log('✅ Tenant:', tenant.namaToko)
+
   // Admin default
   const hashedPassword = await bcrypt.hash('admin123', 10)
   const admin = await prisma.user.upsert({
@@ -16,6 +29,7 @@ async function main() {
       email: 'admin@laundrykas.com',
       password: hashedPassword,
       role: 'ADMIN',
+      tenantId: tenant.id,
     },
   })
   console.log('✅ User admin:', admin.email)
@@ -30,6 +44,7 @@ async function main() {
       email: 'kasir@laundrykas.com',
       password: kasirPassword,
       role: 'KASIR',
+      tenantId: tenant.id,
     },
   })
   console.log('✅ User kasir:', kasir.email)
