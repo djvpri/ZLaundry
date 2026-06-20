@@ -23,7 +23,19 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json({ users })
+    // Get plan info
+    const planSetting = await prisma.setting.findUnique({ where: { key: 'plan' } })
+    const plans = await prisma.plan.findMany({ orderBy: { urutan: 'asc' } })
+    const currentPlan = plans.find(p => p.id === (planSetting?.value || 'free')) || plans[0]
+
+    return NextResponse.json({
+      users,
+      plan: {
+        current: planSetting?.value || 'free',
+        info: currentPlan || null,
+        available: plans,
+      },
+    })
   } catch (error) {
     console.error('Cross-app list users error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -71,6 +83,20 @@ export async function POST(req: NextRequest) {
         switch (action) {
           case 'updateRole':
             await prisma.user.update({ where: { email }, data: { role: data.role } })
+            return NextResponse.json({ success: true })
+
+          case 'updatePlan':
+            // ZLaundry is single-tenant — plan is global setting
+            const validPlans = await prisma.plan.findMany({ select: { id: true } })
+            const planIds = validPlans.map(p => p.id)
+            if (!planIds.includes(data.plan)) {
+              return NextResponse.json({ error: `Plan tidak valid: ${data.plan}` }, { status: 400 })
+            }
+            await prisma.setting.upsert({
+              where: { key: 'plan' },
+              create: { key: 'plan', value: data.plan },
+              update: { value: data.plan },
+            })
             return NextResponse.json({ success: true })
 
           case 'resetPassword':

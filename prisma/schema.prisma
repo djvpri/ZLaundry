@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
-  email     String   @unique
+  email     String        @unique
   password  String
-  faceId    String?  @unique
-  role      Role     @default(KASIR)
-  createdAt DateTime @default(now())
+  faceId    String?       @unique
+  role      Role          @default(KASIR)
+  createdAt DateTime      @default(now())
   orders    Order[]
   logs      ActivityLog[]
 }
@@ -28,14 +28,14 @@ model Customer {
 }
 
 model Service {
-  id          String      @id @default(cuid())
-  name        String
-  type        ServiceType
-  pricePerKg  Int?
-  priceFlat   Int?
-  unit        String?
-  isActive    Boolean     @default(true)
-  orders      Order[]
+  id         String      @id @default(cuid())
+  name       String
+  type       ServiceType
+  pricePerKg Int?
+  priceFlat  Int?
+  unit       String?
+  isActive   Boolean     @default(true)
+  orders     Order[]
 }
 
 model Order {
@@ -90,4 +90,20 @@ model Setting {
   id    String @id @default(cuid())
   key   String @unique
   value String
+}
+
+model Plan {
+  id          String   @id
+  name        String
+  hargaBulan  Int
+  hargaTahun  Int
+  maxOrder    Int
+  maxCustomer Int
+  maxUser     Int
+  maxLayanan  Int
+  fitur       String[]
+  isActive    Boolean  @default(true)
+  urutan      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

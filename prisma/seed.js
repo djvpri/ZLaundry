@@ -67,6 +67,50 @@ async function main() {
   }
   console.log(`✅ Sample customers ditambahkan`)
 
+  // Seed plans
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free',
+      hargaBulan: 0,
+      hargaTahun: 0,
+      maxOrder: 100,
+      maxCustomer: 50,
+      maxUser: 2,
+      maxLayanan: 10,
+      fitur: ['basic_order', 'basic_customer'],
+      urutan: 1,
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      hargaBulan: 99000,
+      hargaTahun: 990000,
+      maxOrder: -1,
+      maxCustomer: -1,
+      maxUser: -1,
+      maxLayanan: -1,
+      fitur: ['basic_order', 'basic_customer', 'report', 'face_login', 'offline'],
+      urutan: 2,
+    },
+  ]
+
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { id: plan.id },
+      create: plan,
+      update: plan,
+    })
+  }
+  console.log(`✅ ${plans.length} plans ditambahkan`)
+
+  // Set default plan
+  const existing = await prisma.setting.findUnique({ where: { key: 'plan' } })
+  if (!existing) {
+    await prisma.setting.create({ data: { key: 'plan', value: 'free' } })
+  }
+  console.log('✅ Default plan: free')
+
   console.log('\n🎉 Seed selesai!')
   console.log('Login admin : admin@laundrykas.com / admin123')
   console.log('Login kasir : kasir@laundrykas.com / kasir123')
