@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { formatRupiah, formatTanggalPendek, STATUS_LABELS, STATUS_COLORS, STATUS_NEXT } from '@/lib/utils'
+import { saveOrders, getOrders, addOrderLocal, updateOrderStatus, enqueueSync } from '@/lib/offline-db'
+import { syncNow } from '@/lib/sync-manager'
 
 type Service = {
   id: string; name: string; type: string
@@ -23,22 +25,48 @@ export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [isOffline, setIsOffline] = useState(false)
 
   const [form, setForm] = useState({
     customerName: '', customerPhone: '', serviceId: '',
     weight: '', quantity: '1', notes: '',
   })
 
+  // Load orders — offline first from IndexedDB, then refresh from server
   const fetchOrders = useCallback(async () => {
-    const url = activeTab === 'SEMUA' ? '/api/orders' : `/api/orders?status=${activeTab}`
-    const res = await fetch(url)
-    const data = await res.json()
-    setOrders(data)
+    // 1. Try local cache first
+    const localOrders = await getOrders()
+    if (localOrders.length > 0) {
+      setOrders(localOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+    }
+
+    // 2. Try fetch from server
+    if (navigator.onLine) {
+      try {
+        const url = activeTab === 'SEMUA' ? '/api/orders' : `/api/orders?status=${activeTab}`
+        const res = await fetch(url)
+        if (res.ok) {
+          const data = await res.json()
+          setOrders(data)
+          await saveOrders(data) // update local cache
+        }
+      } catch {
+        // offline — keep using local data
+      }
+    }
   }, [activeTab])
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
   useEffect(() => {
-    fetch('/api/services').then(r => r.json()).then(setServices)
+    fetch('/api/services').then(r => r.json()).then(setServices).catch(() => {})
+  }, [])
+  useEffect(() => {
+    setIsOffline(!navigator.onLine)
+    const on = () => setIsOffline(false)
+    const off = () => setIsOffline(true)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
   }, [])
 
   const selectedService = services.find(s => s.id === form.serviceId)
@@ -53,41 +81,84 @@ export default function OrdersPage() {
 
   async function handleSubmit() {
     if (!form.customerName || !form.customerPhone || !form.serviceId) {
-      alert('Lengkapi data terlebih dahulu')
-      return
+      alert('Lengkapi data terlebih dahulu'); return
     }
     setLoading(true)
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        weight: parseFloat(form.weight) || undefined,
-        quantity: parseInt(form.quantity) || undefined,
-      }),
-    })
-    setLoading(false)
-    if (res.ok) {
+
+    const payload = {
+      ...form,
+      weight: parseFloat(form.weight) || undefined,
+      quantity: parseInt(form.quantity) || undefined,
+    }
+
+    if (navigator.onLine) {
+      // Online — push directly
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      setLoading(false)
+      if (res.ok) {
+        setShowForm(false)
+        setForm({ customerName: '', customerPhone: '', serviceId: '', weight: '', quantity: '1', notes: '' })
+        fetchOrders()
+      } else {
+        alert('Gagal menyimpan order')
+      }
+    } else {
+      // Offline — save locally + queue sync
+      const tempOrder = {
+        id: `local-${Date.now()}`,
+        orderNumber: Math.floor(Math.random() * 9000) + 1000,
+        status: 'MASUK',
+        totalPrice: calcTotal(),
+        weight: payload.weight || null,
+        quantity: payload.quantity || null,
+        notes: payload.notes || null,
+        createdAt: new Date().toISOString(),
+        dueDate: null,
+        customer: { name: payload.customerName, phone: payload.customerPhone },
+        service: services.find(s => s.id === payload.serviceId) || { name: 'Unknown', type: 'PER_KG' },
+        _local: true,
+      }
+
+      await addOrderLocal(tempOrder)
+      await enqueueSync({ type: 'CREATE_ORDER', payload, timestamp: Date.now() })
+
+      setLoading(false)
       setShowForm(false)
       setForm({ customerName: '', customerPhone: '', serviceId: '', weight: '', quantity: '1', notes: '' })
-      fetchOrders()
-    } else {
-      alert('Gagal menyimpan order')
+
+      // Update local list
+      const local = await getOrders()
+      setOrders(local.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
     }
   }
 
   async function handleUpdateStatus(orderId: string, newStatus: string) {
     setUpdating(orderId)
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
+
+    if (navigator.onLine) {
+      await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+    } else {
+      // Offline — update local + queue
+      await updateOrderStatus(orderId, newStatus)
+      await enqueueSync({ type: 'UPDATE_STATUS', payload: { id: orderId, status: newStatus }, timestamp: Date.now() })
+    }
+
     setUpdating(null)
     fetchOrders()
   }
 
   function handlePrintNota(orderId: string) {
+    if (!navigator.onLine) {
+      alert('Cetak nota butuh koneksi internet'); return
+    }
     window.open(`/api/orders/${orderId}/nota`, '_blank')
   }
 
@@ -99,11 +170,19 @@ export default function OrdersPage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Order & Status</h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{orders.length} order</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            {orders.length} order
+            {isOffline && <span className="ml-2 text-amber-600 font-medium">📱 Offline</span>}
+          </p>
         </div>
-        <button className="btn-primary text-xs sm:text-sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? '✕ Tutup' : '+ Order Baru'}
-        </button>
+        <div className="flex gap-2">
+          {isOffline && (
+            <button onClick={() => syncNow()} className="btn-secondary text-xs sm:text-sm">🔄 Sync</button>
+          )}
+          <button className="btn-primary text-xs sm:text-sm" onClick={() => setShowForm(!showForm)}>
+            {showForm ? '✕ Tutup' : '+ Order Baru'}
+          </button>
+        </div>
       </div>
 
       {/* Form order baru */}
@@ -157,25 +236,20 @@ export default function OrdersPage() {
           <div className="flex gap-3 mt-4 justify-end">
             <button className="btn-secondary" onClick={() => setShowForm(false)}>Batal</button>
             <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? '...' : 'Simpan Order'}
+              {loading ? '...' : '💾 Simpan Order'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Status tabs - scrollable on mobile */}
+      {/* Status tabs */}
       <div className="overflow-x-auto -mx-4 sm:mx-0 mb-4">
         <div className="flex gap-1 bg-white border border-gray-200 p-1 rounded-lg w-fit mx-4 sm:mx-0">
           {STATUS_TABS.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+            <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm rounded-md font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-500 hover:text-gray-900'
-              }`}
-            >
+                activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-900'
+              }`}>
               {tab === 'SEMUA' ? 'Semua' : STATUS_LABELS[tab]}
               <span className={`ml-1 text-xs ${activeTab === tab ? 'text-blue-200' : 'text-gray-400'}`}>
                 {statusCount(tab)}
@@ -185,7 +259,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Desktop table view */}
+      {/* Desktop table */}
       <div className="hidden sm:block card p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-100">
@@ -236,7 +310,7 @@ export default function OrdersPage() {
             {orders.length === 0 && (
               <tr>
                 <td colSpan={7} className="py-12 text-center text-gray-400">
-                  Tidak ada order {activeTab !== 'SEMUA' ? `(${STATUS_LABELS[activeTab]})` : ''}
+                  {isOffline ? 'Tidak ada data lokal' : 'Tidak ada order'}
                 </td>
               </tr>
             )}
@@ -244,20 +318,24 @@ export default function OrdersPage() {
         </table>
       </div>
 
-      {/* Mobile card view */}
+      {/* Mobile cards */}
       <div className="sm:hidden space-y-3">
         {orders.map(order => {
           const nextStatus = STATUS_NEXT[order.status]
+          const isLocal = order.id?.toString().startsWith('local-')
           return (
-            <div key={order.id} className="card p-4">
+            <div key={order.id} className={`card p-4 ${isLocal ? 'border-amber-200 bg-amber-50/30' : ''}`}>
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="font-medium text-gray-900">{order.customer.name}</div>
                   <div className="text-xs text-gray-400">{order.customer.phone}</div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
-                  {STATUS_LABELS[order.status]}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {isLocal && <span className="text-[10px] px-1.5 py-0.5 bg-amber-200 text-amber-700 rounded font-medium">Draft</span>}
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
+                    {STATUS_LABELS[order.status]}
+                  </span>
+                </div>
               </div>
               <div className="text-xs text-gray-500 space-y-1 mb-3">
                 <div className="flex justify-between">
@@ -265,8 +343,6 @@ export default function OrdersPage() {
                   <span className="font-medium text-gray-900">{formatRupiah(order.totalPrice)}</span>
                 </div>
                 <div className="text-gray-400">
-                  {order.weight ? `${order.weight} kg · ` : ''}
-                  {order.quantity ? `${order.quantity} ${order.service.unit || 'unit'} · ` : ''}
                   {formatTanggalPendek(order.createdAt)}
                 </div>
               </div>
@@ -288,7 +364,7 @@ export default function OrdersPage() {
         })}
         {orders.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
-            Tidak ada order {activeTab !== 'SEMUA' ? `(${STATUS_LABELS[activeTab]})` : ''}
+            {isOffline ? 'Tidak ada data lokal' : 'Tidak ada order'}
           </div>
         )}
       </div>
