@@ -15,6 +15,7 @@ model User {
   role      Role     @default(KASIR)
   createdAt DateTime @default(now())
   orders    Order[]
+  logs      ActivityLog[]
 }
 
 model Customer {
@@ -70,4 +71,22 @@ enum OrderStatus {
   PROSES
   SELESAI
   DIAMBIL
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
 }

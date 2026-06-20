@@ -23,6 +23,7 @@ export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [sendingWA, setSendingWA] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     customerName: '', customerPhone: '', serviceId: '',
@@ -85,6 +86,22 @@ export default function OrdersPage() {
     })
     setUpdating(null)
     fetchOrders()
+  }
+
+  function handlePrintNota(orderId: string) {
+    window.open(`/api/orders/${orderId}/nota`, '_blank')
+  }
+
+  async function handleSendWA(orderId: string) {
+    setSendingWA(orderId)
+    const res = await fetch(`/api/orders/${orderId}/send-wa`, { method: 'POST' })
+    const data = await res.json()
+    setSendingWA(null)
+    if (res.ok) {
+      alert('WhatsApp terkirim! ✓')
+    } else {
+      alert(data.error || 'Gagal kirim WhatsApp')
+    }
   }
 
   const statusCount = (s: string) => orders.filter(o => s === 'SEMUA' || o.status === s).length
@@ -224,18 +241,35 @@ export default function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3.5">
-                    {nextStatus && (
+                    <div className="flex gap-1 flex-wrap">
+                      {nextStatus && (
+                        <button
+                          onClick={() => handleUpdateStatus(order.id, nextStatus)}
+                          disabled={updating === order.id}
+                          className="btn-secondary text-xs py-1 px-2"
+                        >
+                          {updating === order.id ? '...' : `→ ${STATUS_LABELS[nextStatus]}`}
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleUpdateStatus(order.id, nextStatus)}
-                        disabled={updating === order.id}
-                        className="btn-secondary text-xs py-1 px-3"
+                        onClick={() => handlePrintNota(order.id)}
+                        className="btn-secondary text-xs py-1 px-2"
+                        title="Cetak Nota PDF"
                       >
-                        {updating === order.id ? '...' : `→ ${STATUS_LABELS[nextStatus]}`}
+                        🖨️
                       </button>
-                    )}
-                    {order.status === 'DIAMBIL' && (
-                      <span className="text-xs text-gray-300">Selesai ✓</span>
-                    )}
+                      <button
+                        onClick={() => handleSendWA(order.id)}
+                        disabled={sendingWA === order.id}
+                        className="btn-secondary text-xs py-1 px-2"
+                        title="Kirim WA ke pelanggan"
+                      >
+                        {sendingWA === order.id ? '...' : '📱'}
+                      </button>
+                      {order.status === 'DIAMBIL' && (
+                        <span className="text-xs text-green-500 font-medium">✓</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )

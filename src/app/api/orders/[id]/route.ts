@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logActivity } from '@/lib/log-activity'
+import { sendWhatsAppStatus } from '@/lib/fonnte'
 
 export async function PATCH(
   req: NextRequest,
@@ -21,8 +23,13 @@ export async function PATCH(
   const order = await prisma.order.update({
     where: { id: params.id },
     data: { status },
-    include: { customer: true, service: true },
+    include: { customer: true, service: true, kasir: { select: { name: true } } },
   })
+
+  await logActivity(session.user.id as string, 'UPDATE_STATUS', `Order #${order.orderNumber} → ${status}`)
+
+  // Kirim WA notifikasi (async, don't block response)
+  sendWhatsAppStatus(order as any).catch(console.error)
 
   return NextResponse.json(order)
 }
@@ -36,6 +43,16 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const order = await prisma.order.findUnique({
+    where: { id: params.id },
+    include: { customer: true },
+  })
+
   await prisma.order.delete({ where: { id: params.id } })
+
+  if (order) {
+    await logActivity(session.user.id as string, 'HAPUS_ORDER', `Order #${order.orderNumber} - ${order.customer.name}`)
+  }
+
   return NextResponse.json({ success: true })
 }

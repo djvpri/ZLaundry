@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { formatRupiah, formatTanggal, STATUS_LABELS, STATUS_COLORS } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 async function getDashboardData() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)

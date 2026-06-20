@@ -6,11 +6,14 @@ import { signOut, useSession } from 'next-auth/react'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
   { href: '/orders', label: 'Order & Status', icon: '👕' },
+  { href: '/laporan', label: 'Laporan', icon: '📈' },
 ]
 
 const adminItems = [
   { href: '/admin/services', label: 'Kelola Layanan', icon: '⚙️' },
   { href: '/admin/users', label: 'Kelola Pengguna', icon: '👥' },
+  { href: '/pengaturan', label: 'Pengaturan', icon: '🔧' },
+  { href: '/logs', label: 'Log Aktivitas', icon: '📋' },
 ]
 
 export default function Sidebar() {

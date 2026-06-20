@@ -4,6 +4,7 @@ import type { Session } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { logActivity } from '@/lib/log-activity'
 
 function adminOnly(session: Session | null) {
   if (!session || session.user.role !== 'ADMIN') {
@@ -51,5 +52,8 @@ export async function POST(req: NextRequest) {
     },
     select: { id: true, name: true, email: true, role: true, createdAt: true },
   })
+
+  await logActivity(session!.user.id as string, 'CREATE_USER', `User baru: ${name} (${email})`)
+
   return NextResponse.json(user, { status: 201 })
 }

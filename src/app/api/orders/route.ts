@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logActivity } from '@/lib/log-activity'
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
     data: {
       customerId: customer.id,
       serviceId: service.id,
-      kasirId: session.user.id,
+      kasirId: session.user.id as string,
       weight: weight || null,
       quantity: quantity || null,
       totalPrice,
@@ -86,6 +87,8 @@ export async function POST(req: NextRequest) {
     },
     include: { customer: true, service: true },
   })
+
+  await logActivity(session.user.id as string, 'ORDER_BARU', `Order #${order.orderNumber} - ${customer.name}`)
 
   return NextResponse.json(order, { status: 201 })
 }

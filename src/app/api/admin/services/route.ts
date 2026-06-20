@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import type { Session } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logActivity } from '@/lib/log-activity'
 
 function adminOnly(session: Session | null) {
   if (!session || session.user.role !== 'ADMIN') {
@@ -47,5 +48,8 @@ export async function POST(req: NextRequest) {
       unit: type === 'SATUAN' ? (unit || 'pcs') : null,
     },
   })
+
+  await logActivity(session!.user.id as string, 'UPDATE_SERVICE', `Tambah layanan: ${name}`)
+
   return NextResponse.json(service, { status: 201 })
 }
