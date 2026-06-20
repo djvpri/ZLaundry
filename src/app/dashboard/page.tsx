@@ -46,30 +46,32 @@ export default async function DashboardPage() {
   const { totalToday, pendapatanToday, statusMap, recentOrders } = await getDashboardData()
 
   const stats = [
-    { label: 'Order Hari Ini', value: `${totalToday} order`, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Pendapatan Hari Ini', value: formatRupiah(pendapatanToday), color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Masuk', value: `${statusMap['MASUK'] || 0}`, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { label: 'Proses', value: `${statusMap['PROSES'] || 0}`, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    { label: 'Selesai', value: `${statusMap['SELESAI'] || 0}`, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Diambil', value: `${statusMap['DIAMBIL'] || 0}`, color: 'text-gray-500', bg: 'bg-gray-50' },
+    { label: 'Order Hari Ini', value: `${totalToday}`, color: 'text-blue-600', icon: '📦' },
+    { label: 'Pendapatan', value: formatRupiah(pendapatanToday), color: 'text-green-600', icon: '💰' },
+    { label: 'Masuk', value: `${statusMap['MASUK'] || 0}`, color: 'text-blue-500', icon: '📥' },
+    { label: 'Proses', value: `${statusMap['PROSES'] || 0}`, color: 'text-yellow-600', icon: '⏳' },
+    { label: 'Selesai', value: `${statusMap['SELESAI'] || 0}`, color: 'text-green-600', icon: '✅' },
+    { label: 'Diambil', value: `${statusMap['DIAMBIL'] || 0}`, color: 'text-gray-500', icon: '📦' },
   ]
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Selamat datang, {session?.user?.name} · {formatTanggal(new Date())}
+    <div className="p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Dashboard</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          {session?.user?.name} · {formatTanggal(new Date())}
         </p>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-6 sm:mb-8">
         {stats.map((s, i) => (
-          <div key={i} className="card">
-            <div className={`text-xs font-medium text-gray-500 mb-2`}>{s.label}</div>
-            <div className={`text-lg font-semibold ${s.color}`}>{s.value}</div>
+          <div key={i} className="card p-3 sm:p-4">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-sm sm:text-base">{s.icon}</span>
+              <span className="text-[10px] sm:text-xs font-medium text-gray-500 truncate">{s.label}</span>
+            </div>
+            <div className={`text-sm sm:text-lg font-semibold ${s.color}`}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -77,10 +79,12 @@ export default async function DashboardPage() {
       {/* Recent orders */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-medium text-gray-900">Order Terbaru</h2>
-          <a href="/orders" className="text-sm text-blue-600 hover:underline">Lihat semua →</a>
+          <h2 className="font-medium text-gray-900 text-sm sm:text-base">Order Terbaru</h2>
+          <a href="/orders" className="text-xs sm:text-sm text-blue-600 hover:underline">Lihat semua →</a>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Desktop */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
@@ -108,16 +112,31 @@ export default async function DashboardPage() {
                   </td>
                 </tr>
               ))}
-              {recentOrders.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
-                    Belum ada order hari ini
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile */}
+        <div className="sm:hidden space-y-2">
+          {recentOrders.map(order => (
+            <div key={order.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+              <div>
+                <div className="text-sm font-medium text-gray-900">{order.customer.name}</div>
+                <div className="text-xs text-gray-400">{order.service.name}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium">{formatRupiah(order.totalPrice)}</div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[order.status]}`}>
+                  {STATUS_LABELS[order.status]}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {recentOrders.length === 0 && (
+          <p className="py-8 text-center text-gray-400 text-sm">Belum ada order</p>
+        )}
       </div>
     </div>
   )

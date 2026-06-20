@@ -16,32 +16,22 @@ export default function PengaturanPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(setSettings)
-      .finally(() => setLoading(false))
+    fetch('/api/settings').then(r => r.json()).then(setSettings).finally(() => setLoading(false))
   }, [])
 
   async function handleSave() {
-    setSaving(true)
-    setSuccess(false)
-    await fetch('/api/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    })
-    setSaving(false)
-    setSuccess(true)
-    setTimeout(() => setSuccess(false), 2000)
+    setSaving(true); setSuccess(false)
+    await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) })
+    setSaving(false); setSuccess(true); setTimeout(() => setSuccess(false), 2000)
   }
 
-  if (loading) return <div className="p-6 text-center text-gray-400">Memuat...</div>
+  if (loading) return <div className="p-4 sm:p-6 text-center text-gray-400">Memuat...</div>
 
   return (
-    <div className="p-6 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Pengaturan</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Informasi laundry</p>
+    <div className="p-4 sm:p-6 max-w-2xl">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Pengaturan</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Informasi laundry</p>
       </div>
 
       <div className="card">
@@ -49,12 +39,8 @@ export default function PengaturanPage() {
         {SETTING_FIELDS.map(f => (
           <div key={f.key} className="mb-3">
             <label className="label">{f.label}</label>
-            <input
-              className="input"
-              placeholder={f.placeholder}
-              value={settings[f.key] || ''}
-              onChange={e => setSettings(s => ({ ...s, [f.key]: e.target.value }))}
-            />
+            <input className="input" placeholder={f.placeholder}
+              value={settings[f.key] || ''} onChange={e => setSettings(s => ({ ...s, [f.key]: e.target.value }))} />
           </div>
         ))}
         <div className="flex items-center gap-3 mt-4">

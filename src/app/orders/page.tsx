@@ -94,23 +94,23 @@ export default function OrdersPage() {
   const statusCount = (s: string) => orders.filter(o => s === 'SEMUA' || o.status === s).length
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Order & Status Cucian</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{orders.length} order ditampilkan</p>
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Order & Status</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{orders.length} order</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+        <button className="btn-primary text-xs sm:text-sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? '✕ Tutup' : '+ Order Baru'}
         </button>
       </div>
 
       {/* Form order baru */}
       {showForm && (
-        <div className="card mb-6 border-blue-200 bg-blue-50/30">
+        <div className="card mb-4 sm:mb-6 border-blue-200 bg-blue-50/30">
           <h2 className="font-medium text-gray-900 mb-4">Order Baru</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="label">Nama pelanggan *</label>
               <input className="input" placeholder="Cth: Ibu Sari"
@@ -125,13 +125,9 @@ export default function OrdersPage() {
               <label className="label">Layanan *</label>
               <select className="input" value={form.serviceId}
                 onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}>
-                <option value="">-- Pilih layanan --</option>
+                <option value="">-- Pilih --</option>
                 {services.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} — {s.type === 'PER_KG'
-                      ? `Rp ${(s.pricePerKg || 0).toLocaleString('id-ID')}/kg`
-                      : `Rp ${(s.priceFlat || 0).toLocaleString('id-ID')}/${s.unit}`}
-                  </option>
+                  <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
             </div>
@@ -148,60 +144,59 @@ export default function OrdersPage() {
                   value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} />
               </div>
             )}
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="label">Catatan (opsional)</label>
-              <input className="input" placeholder="Cth: ada noda di kemeja putih"
+              <input className="input" placeholder="Cth: ada noda"
                 value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
             </div>
           </div>
-          {/* Total preview */}
           <div className="mt-4 flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3">
-            <div className="text-sm text-gray-500">Total estimasi</div>
-            <div className="text-xl font-semibold text-blue-600">{formatRupiah(calcTotal())}</div>
+            <div className="text-xs sm:text-sm text-gray-500">Total estimasi</div>
+            <div className="text-lg sm:text-xl font-semibold text-blue-600">{formatRupiah(calcTotal())}</div>
           </div>
           <div className="flex gap-3 mt-4 justify-end">
             <button className="btn-secondary" onClick={() => setShowForm(false)}>Batal</button>
             <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? 'Menyimpan...' : '💾 Simpan Order'}
+              {loading ? '...' : 'Simpan Order'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Status tabs */}
-      <div className="flex gap-1 mb-4 bg-white border border-gray-200 p-1 rounded-lg w-fit">
-        {STATUS_TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${
-              activeTab === tab
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            {tab === 'SEMUA' ? 'Semua' : STATUS_LABELS[tab]}
-            {' '}
-            <span className={`text-xs ${activeTab === tab ? 'text-blue-200' : 'text-gray-400'}`}>
-              ({statusCount(tab)})
-            </span>
-          </button>
-        ))}
+      {/* Status tabs - scrollable on mobile */}
+      <div className="overflow-x-auto -mx-4 sm:mx-0 mb-4">
+        <div className="flex gap-1 bg-white border border-gray-200 p-1 rounded-lg w-fit mx-4 sm:mx-0">
+          {STATUS_TABS.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm rounded-md font-medium whitespace-nowrap transition-colors ${
+                activeTab === tab
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {tab === 'SEMUA' ? 'Semua' : STATUS_LABELS[tab]}
+              <span className={`ml-1 text-xs ${activeTab === tab ? 'text-blue-200' : 'text-gray-400'}`}>
+                {statusCount(tab)}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tabel order */}
-      <div className="card p-0 overflow-hidden">
+      {/* Desktop table view */}
+      <div className="hidden sm:block card p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="text-left text-xs text-gray-400 font-medium px-5 py-3">#</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Pelanggan</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Layanan</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Detail</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Total</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Masuk</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Status</th>
-              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3">Aksi</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-5 py-3 whitespace-nowrap">#</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Pelanggan</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Layanan</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Total</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Masuk</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Status</th>
+              <th className="text-left text-xs text-gray-400 font-medium px-4 py-3 whitespace-nowrap">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -214,40 +209,25 @@ export default function OrdersPage() {
                     <div className="font-medium text-gray-900">{order.customer.name}</div>
                     <div className="text-xs text-gray-400">{order.customer.phone}</div>
                   </td>
-                  <td className="px-4 py-3.5 text-gray-700">{order.service.name}</td>
-                  <td className="px-4 py-3.5 text-gray-500 text-xs">
-                    {order.weight ? `${order.weight} kg` : ''}
-                    {order.quantity ? `${order.quantity} ${order.service.unit || 'unit'}` : ''}
-                    {order.notes && <div className="text-gray-400 mt-0.5 truncate max-w-32">{order.notes}</div>}
-                  </td>
-                  <td className="px-4 py-3.5 font-medium">{formatRupiah(order.totalPrice)}</td>
-                  <td className="px-4 py-3.5 text-gray-400 text-xs">{formatTanggalPendek(order.createdAt)}</td>
+                  <td className="px-4 py-3.5 text-gray-700 whitespace-nowrap">{order.service.name}</td>
+                  <td className="px-4 py-3.5 font-medium whitespace-nowrap">{formatRupiah(order.totalPrice)}</td>
+                  <td className="px-4 py-3.5 text-gray-400 text-xs whitespace-nowrap">{formatTanggalPendek(order.createdAt)}</td>
                   <td className="px-4 py-3.5">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
                       {STATUS_LABELS[order.status]}
                     </span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="flex gap-1 flex-wrap">
+                    <div className="flex gap-1">
                       {nextStatus && (
-                        <button
-                          onClick={() => handleUpdateStatus(order.id, nextStatus)}
+                        <button onClick={() => handleUpdateStatus(order.id, nextStatus)}
                           disabled={updating === order.id}
-                          className="btn-secondary text-xs py-1 px-2"
-                        >
+                          className="btn-secondary text-xs py-1 px-2 whitespace-nowrap">
                           {updating === order.id ? '...' : `→ ${STATUS_LABELS[nextStatus]}`}
                         </button>
                       )}
-                      <button
-                        onClick={() => handlePrintNota(order.id)}
-                        className="btn-secondary text-xs py-1 px-2"
-                        title="Cetak Nota PDF"
-                      >
-                        🖨️
-                      </button>
-                      {order.status === 'DIAMBIL' && (
-                        <span className="text-xs text-green-500 font-medium">✓</span>
-                      )}
+                      <button onClick={() => handlePrintNota(order.id)}
+                        className="btn-secondary text-xs py-1 px-2">🖨️</button>
                     </div>
                   </td>
                 </tr>
@@ -255,13 +235,62 @@ export default function OrdersPage() {
             })}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-12 text-center text-gray-400">
-                  Tidak ada order {activeTab !== 'SEMUA' ? `dengan status ${STATUS_LABELS[activeTab]}` : ''}
+                <td colSpan={7} className="py-12 text-center text-gray-400">
+                  Tidak ada order {activeTab !== 'SEMUA' ? `(${STATUS_LABELS[activeTab]})` : ''}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-3">
+        {orders.map(order => {
+          const nextStatus = STATUS_NEXT[order.status]
+          return (
+            <div key={order.id} className="card p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <div className="font-medium text-gray-900">{order.customer.name}</div>
+                  <div className="text-xs text-gray-400">{order.customer.phone}</div>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
+                  {STATUS_LABELS[order.status]}
+                </span>
+              </div>
+              <div className="text-xs text-gray-500 space-y-1 mb-3">
+                <div className="flex justify-between">
+                  <span>#{order.orderNumber} · {order.service.name}</span>
+                  <span className="font-medium text-gray-900">{formatRupiah(order.totalPrice)}</span>
+                </div>
+                <div className="text-gray-400">
+                  {order.weight ? `${order.weight} kg · ` : ''}
+                  {order.quantity ? `${order.quantity} ${order.service.unit || 'unit'} · ` : ''}
+                  {formatTanggalPendek(order.createdAt)}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {nextStatus && (
+                  <button onClick={() => handleUpdateStatus(order.id, nextStatus)}
+                    disabled={updating === order.id}
+                    className="flex-1 text-xs py-2 bg-blue-50 text-blue-700 rounded-lg font-medium hover:bg-blue-100 transition-colors">
+                    {updating === order.id ? '...' : `→ ${STATUS_LABELS[nextStatus]}`}
+                  </button>
+                )}
+                <button onClick={() => handlePrintNota(order.id)}
+                  className="px-3 py-2 text-xs bg-gray-50 text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100">
+                  🖨️
+                </button>
+              </div>
+            </div>
+          )
+        })}
+        {orders.length === 0 && (
+          <div className="text-center py-12 text-gray-400 text-sm">
+            Tidak ada order {activeTab !== 'SEMUA' ? `(${STATUS_LABELS[activeTab]})` : ''}
+          </div>
+        )}
       </div>
     </div>
   )

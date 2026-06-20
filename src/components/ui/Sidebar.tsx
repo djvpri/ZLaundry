@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { useState } from 'react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -20,10 +21,10 @@ export default function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  return (
-    <aside className="w-60 bg-white border-r border-gray-200 flex flex-col min-h-screen">
-      {/* Brand */}
+  const navContent = (
+    <>
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
@@ -36,13 +37,13 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="p-3 flex-1">
         <div className="space-y-1">
           {navItems.map(item => (
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 pathname === item.href
                   ? 'bg-blue-50 text-blue-700 font-medium'
@@ -63,6 +64,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                     pathname === item.href
                       ? 'bg-blue-50 text-blue-700 font-medium'
@@ -78,7 +80,6 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* User */}
       <div className="p-3 border-t border-gray-100">
         <div className="px-3 py-2 mb-1">
           <div className="text-sm font-medium text-gray-900">{session?.user?.name}</div>
@@ -91,6 +92,40 @@ export default function Sidebar() {
           <span>🚪</span> Keluar
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm">🧺</span>
+          </div>
+          <span className="font-semibold text-sm text-gray-900">Z Laundry</span>
+        </div>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/30" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Mobile sidebar */}
+      <aside className={`lg:hidden fixed top-14 left-0 bottom-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {navContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-60 bg-white border-r border-gray-200 flex-col min-h-screen">
+        {navContent}
+      </aside>
+    </>
   )
 }
