@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
             if (payload.app !== 'zlaundry') return null
             const email = String(payload.email || '')
             const user = await prisma.user.findUnique({ where: { email } })
-            if (!user || user.isActive === false) return null
+            if (!user) return null
             return { id: user.id, name: user.name, email: user.email, role: user.role }
           } catch { return null }
         }
