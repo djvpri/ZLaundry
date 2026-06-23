@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { formatRupiah, formatTanggalPendek, STATUS_LABELS, STATUS_COLORS, STATUS_NEXT } from '@/lib/utils'
 import { saveOrders, getOrders, addOrderLocal, updateOrderStatus, enqueueSync } from '@/lib/offline-db'
 import { syncNow } from '@/lib/sync-manager'
+import { buildEscPos, printViaBluetooth, isBluetoothSupported, selectPrinter, getSavedPrinterName, PrintStatus } from '@/lib/thermal-print'
 
 type Service = {
   id: string; name: string; type: string
@@ -20,6 +21,10 @@ const STATUS_TABS = ['SEMUA', 'MASUK', 'PROSES', 'SELESAI', 'DIAMBIL']
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
+  const [btStatus, setBtStatus] = useState<PrintStatus>('idle')
+  const [btMsg, setBtMsg] = useState('')
+  const [savedPrinter, setSavedPrinter] = useState<string | null>(null)
+  const [printingOrderId, setPrintingOrderId] = useState<string | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [activeTab, setActiveTab] = useState('SEMUA')
   const [showForm, setShowForm] = useState(false)
@@ -162,6 +167,44 @@ export default function OrdersPage() {
     window.open(`/api/orders/${orderId}/nota`, '_blank')
   }
 
+  async function handlePrintThermal(order: Order) {
+    setPrintingOrderId(order.id)
+    const escPos = buildEscPos({
+      namaToko: 'Z Laundry',
+      waktu: new Date(order.createdAt).toLocaleString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      }),
+      noTransaksi: `#${order.orderNumber}`,
+      kasir: (order as any).kasir?.name || '',
+      items: [{
+        nama: `${(order as any).service?.name || 'Laundry'}${(order as any).weight ? ` (${(order as any).weight} kg)` : ''}`,
+        qty: (order as any).quantity || 1,
+        harga: order.totalPrice / ((order as any).quantity || 1),
+      }],
+      subtotal: order.totalPrice,
+      total: order.totalPrice,
+      bayar: order.totalPrice,
+      kembali: 0,
+      metodeBayar: (order as any).paymentMethod || 'CASH',
+      catatan: [
+        order.notes,
+        (order as any).dueDate ? `Selesai: ${new Date((order as any).dueDate).toLocaleDateString('id-ID')}` : '',
+        `Pelanggan: ${(order as any).customer?.name || ''}`,
+        (order as any).customer?.phone ? `HP: ${(order as any).customer.phone}` : '',
+      ].filter(Boolean).join(' | '),
+    })
+    await printViaBluetooth(escPos, (status, msg) => {
+      setBtStatus(status)
+      setBtMsg(msg || '')
+    })
+    setPrintingOrderId(null)
+  }
+
+  useEffect(() => {
+    getSavedPrinterName().then(name => setSavedPrinter(name))
+  }, [])
+
   const statusCount = (s: string) => orders.filter(o => s === 'SEMUA' || o.status === s).length
 
   return (
@@ -178,6 +221,14 @@ export default function OrdersPage() {
         <div className="flex gap-2">
           {isOffline && (
             <button onClick={() => syncNow()} className="btn-secondary text-xs sm:text-sm">🔄 Sync</button>
+          )}
+          {isBluetoothSupported() && (
+            <button
+              onClick={async () => { const name = await selectPrinter(); if (name) setSavedPrinter(name) }}
+              className="btn-secondary text-xs sm:text-sm"
+              title={savedPrinter ? `Printer: ${savedPrinter}` : 'Pilih printer Bluetooth'}>
+              🔵 {savedPrinter ? savedPrinter : 'Set Printer'}
+            </button>
           )}
           <button className="btn-primary text-xs sm:text-sm" onClick={() => setShowForm(!showForm)}>
             {showForm ? '✕ Tutup' : '+ Order Baru'}
@@ -302,6 +353,14 @@ export default function OrdersPage() {
                       )}
                       <button onClick={() => handlePrintNota(order.id)}
                         className="btn-secondary text-xs py-1 px-2">🖨️</button>
+                      {isBluetoothSupported() && (
+                        <button
+                          onClick={() => handlePrintThermal(order)}
+                          disabled={printingOrderId === order.id}
+                          className="btn-secondary text-xs py-1 px-2 text-blue-600 disabled:opacity-50">
+                          {printingOrderId === order.id ? '...' : '🔵'}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -358,6 +417,14 @@ export default function OrdersPage() {
                   className="px-3 py-2 text-xs bg-gray-50 text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100">
                   🖨️
                 </button>
+                {isBluetoothSupported() && (
+                  <button
+                    onClick={() => handlePrintThermal(order)}
+                    disabled={printingOrderId === order.id}
+                    className="px-3 py-2 text-xs bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 disabled:opacity-50">
+                    {printingOrderId === order.id ? '...' : '🔵'}
+                  </button>
+                )}
               </div>
             </div>
           )
