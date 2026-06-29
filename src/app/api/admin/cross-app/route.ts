@@ -134,6 +134,13 @@ export async function POST(req: NextRequest) {
           case 'updateRole':
             await prisma.user.update({ where: { email }, data: { role: data.role } })
             return NextResponse.json({ success: true })
+          case 'moveTenant': {
+            if (!data?.tenantId) return NextResponse.json({ error: 'tenantId wajib' }, { status: 400 })
+            const tenant = await prisma.tenant.findUnique({ where: { id: data.tenantId } })
+            if (!tenant) return NextResponse.json({ error: 'Tenant tidak ditemukan' }, { status: 404 })
+            await prisma.user.update({ where: { email }, data: { tenantId: data.tenantId } })
+            return NextResponse.json({ success: true })
+          }
           case 'resetPassword': {
             if (!data.password || data.password.length < 6) {
               return NextResponse.json({ error: 'Password min 6 karakter' }, { status: 400 })
