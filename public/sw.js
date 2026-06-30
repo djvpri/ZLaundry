@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zlaundry-v2'
+const CACHE_NAME = 'zlaundry-v3'
 const SHELL = [
   '/',
   '/dashboard',
@@ -48,19 +48,19 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // Pages — stale-while-revalidate
+  // Pages (HTML/navigasi) — network-first.
+  // HTML WAJIB fresh agar nama chunk `_next/static/...` cocok dengan build
+  // terbaru. Stale-while-revalidate menyajikan HTML lama yang menunjuk chunk
+  // yang sudah 404 setelah redeploy → ChunkLoadError. Cache hanya untuk
+  // fallback saat offline.
   e.respondWith(
-    caches.match(request).then(cached => {
-      const fetched = fetch(request).then(r => {
-        if (r.ok) {
-          const clone = r.clone()
-          caches.open(CACHE_NAME).then(c => c.put(request, clone))
-        }
-        return r
-      }).catch(() => cached)
-
-      return cached || fetched
-    })
+    fetch(request).then(r => {
+      if (r.ok) {
+        const clone = r.clone()
+        caches.open(CACHE_NAME).then(c => c.put(request, clone))
+      }
+      return r
+    }).catch(() => caches.match(request))
   )
 })
 
