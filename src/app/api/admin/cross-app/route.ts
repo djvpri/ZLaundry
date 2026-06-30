@@ -131,9 +131,16 @@ export async function POST(req: NextRequest) {
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
         switch (action) {
-          case 'updateRole':
-            await prisma.user.update({ where: { email }, data: { role: data.role } })
+          case 'updateRole': {
+            // Role di ZLaundry enum uppercase (ADMIN/KASIR). Z One kirim role
+            // generik (mis. "admin") -> normalkan ke uppercase biar valid.
+            const role = String(data?.role || '').toUpperCase()
+            if (!['ADMIN', 'KASIR'].includes(role)) {
+              return NextResponse.json({ error: 'Role tidak valid (ADMIN/KASIR)' }, { status: 400 })
+            }
+            await prisma.user.update({ where: { email }, data: { role: role as any } })
             return NextResponse.json({ success: true })
+          }
           case 'moveTenant': {
             if (!data?.tenantId) return NextResponse.json({ error: 'tenantId wajib' }, { status: 400 })
             const tenant = await prisma.tenant.findUnique({ where: { id: data.tenantId } })
