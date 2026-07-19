@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
           </div>
           <div className="flex gap-3 mt-4 justify-end">
             <button className="btn-secondary" onClick={() => { setShowForm(false); setEditId(null) }}>Batal</button>
-            <button className="btn-primary" onClick={handleSave} disabled={loading}>{loading ? '...' : '💾 Simpan'}</button>
+            <button className="btn-primary" onClick={handleSave} disabled={loading}>{loading ? '...' : <><i className="bi bi-save" /> Simpan</>}</button>
           </div>
         </div>
       )}

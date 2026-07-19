@@ -35,7 +35,7 @@ export default function PengaturanPage() {
       </div>
 
       <div className="card">
-        <h2 className="font-medium text-gray-900 mb-4">🧺 Informasi Laundry</h2>
+        <h2 className="font-medium text-gray-900 mb-4"><i className="bi bi-droplet-half mr-2" />Informasi Laundry</h2>
         {SETTING_FIELDS.map(f => (
           <div key={f.key} className="mb-3">
             <label className="label">{f.label}</label>
@@ -45,9 +45,9 @@ export default function PengaturanPage() {
         ))}
         <div className="flex items-center gap-3 mt-4">
           <button className="btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Menyimpan...' : '💾 Simpan'}
+            {saving ? 'Menyimpan...' : <><i className="bi bi-save" /> Simpan</>}
           </button>
-          {success && <span className="text-sm text-green-600 font-medium">✓ Tersimpan</span>}
+          {success && <span className="text-sm text-green-600 font-medium"><i className="bi bi-check-lg" /> Tersimpan</span>}
         </div>
       </div>
     </div>

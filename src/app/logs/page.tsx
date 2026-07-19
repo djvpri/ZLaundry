@@ -7,8 +7,8 @@ type Log = {
 }
 
 const ACTION_LABELS: Record<string, string> = {
-  ORDER_BARU: '🛒 Order Baru', UPDATE_STATUS: '📦 Update Status',
-  HAPUS_ORDER: '🗑️ Hapus Order', CREATE_USER: '👤 Buat User', UPDATE_SERVICE: '⚙️ Update Layanan',
+  ORDER_BARU: 'Order Baru', UPDATE_STATUS: 'Update Status',
+  HAPUS_ORDER: 'Hapus Order', CREATE_USER: 'Buat User', UPDATE_SERVICE: 'Update Layanan',
 }
 
 export default function LogsPage() {

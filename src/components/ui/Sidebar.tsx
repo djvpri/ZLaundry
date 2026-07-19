@@ -5,16 +5,16 @@ import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { href: '/orders', label: 'Order & Status', icon: '👕' },
-  { href: '/laporan', label: 'Laporan', icon: '📈' },
+  { href: '/dashboard', label: 'Dashboard', icon: 'bi bi-speedometer2' },
+  { href: '/orders', label: 'Order & Status', icon: 'bi bi-basket3' },
+  { href: '/laporan', label: 'Laporan', icon: 'bi bi-bar-chart-line' },
 ]
 
 const adminItems = [
-  { href: '/admin/services', label: 'Kelola Layanan', icon: '⚙️' },
-  { href: '/admin/users', label: 'Kelola Pengguna', icon: '👥' },
-  { href: '/pengaturan', label: 'Pengaturan', icon: '🔧' },
-  { href: '/logs', label: 'Log Aktivitas', icon: '📋' },
+  { href: '/admin/services', label: 'Kelola Layanan', icon: 'bi bi-sliders2' },
+  { href: '/admin/users', label: 'Kelola Pengguna', icon: 'bi bi-people' },
+  { href: '/pengaturan', label: 'Pengaturan', icon: 'bi bi-gear' },
+  { href: '/logs', label: 'Log Aktivitas', icon: 'bi bi-clock-history' },
 ]
 
 export default function Sidebar() {
@@ -28,7 +28,7 @@ export default function Sidebar() {
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-            <span className="text-white text-lg">🧺</span>
+            <i className="bi bi-droplet-half text-white text-lg" />
           </div>
           <div>
             <div className="font-semibold text-gray-900 text-sm">Z Laundry</div>
@@ -50,7 +50,7 @@ export default function Sidebar() {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <span>{item.icon}</span>
+              <i className={`${item.icon} text-base w-4 text-center`} />
               {item.label}
             </Link>
           ))}
@@ -71,7 +71,7 @@ export default function Sidebar() {
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <span>{item.icon}</span>
+                  <i className={`${item.icon} text-base w-4 text-center`} />
                   {item.label}
                 </Link>
               ))}
@@ -89,7 +89,7 @@ export default function Sidebar() {
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
-          <span>🚪</span> Keluar
+          <i className="bi bi-box-arrow-right text-base" /> Keluar
         </button>
       </div>
     </>
@@ -100,13 +100,11 @@ export default function Sidebar() {
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <i className="bi bi-list text-xl" />
         </button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm">🧺</span>
+            <i className="bi bi-droplet-half text-white text-sm" />
           </div>
           <span className="font-semibold text-sm text-gray-900">Z Laundry</span>
         </div>

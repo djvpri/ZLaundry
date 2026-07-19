@@ -51,7 +51,7 @@ export default function OfflineStatus() {
   if (!isOnline) {
     return (
       <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-500 text-white text-center py-2 px-4 text-xs sm:text-sm font-medium shadow-md">
-        ⚠️ Offline — perubahan disimpan lokal, sync otomatis saat online
+        <i className="bi bi-wifi-off mr-1" /> Offline — perubahan disimpan lokal, sync otomatis saat online
       </div>
     )
   }
@@ -60,7 +60,7 @@ export default function OfflineStatus() {
   if (error && !isSyncing) {
     return (
       <div className="fixed top-0 left-0 right-0 z-[60] bg-red-500 text-white text-center py-2 px-4 text-xs sm:text-sm shadow-md flex items-center justify-center gap-2">
-        <span>⚠️ {error}</span>
+        <i className="bi bi-exclamation-triangle-fill" /><span>{error}</span>
         <button onClick={() => { setError(null); syncNow() }} className="underline font-medium">Coba lagi</button>
       </div>
     )
@@ -84,7 +84,7 @@ export default function OfflineStatus() {
       <div className="fixed top-2 right-4 z-[60]">
         <button onClick={() => syncNow()}
           className="bg-amber-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 hover:bg-amber-600 transition-colors">
-          📤 {pendingCount} belum tersinkron
+          <i className="bi bi-arrow-up-circle" /> {pendingCount} belum tersinkron
         </button>
       </div>
     )

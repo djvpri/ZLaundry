@@ -4,32 +4,32 @@ import Link from 'next/link'
 
 const features = [
   {
-    icon: '📋',
+    icon: 'bi bi-clipboard2-check',
     title: 'Manajemen Order',
     desc: 'Catat pesanan pelanggan dalam hitungan detik. Lengkap dengan nama, nomor HP, layanan, dan berat cucian.',
   },
   {
-    icon: '🔄',
+    icon: 'bi bi-arrow-repeat',
     title: 'Tracking Status Real-time',
     desc: 'Lacak setiap cucian dari Masuk → Proses → Selesai → Diambil. Kasir bisa update status langsung dari aplikasi.',
   },
   {
-    icon: '📊',
+    icon: 'bi bi-speedometer2',
     title: 'Dashboard Analitik',
     desc: 'Lihat total order dan pendapatan hari ini sekilas. Statistik per status cucian langsung di beranda.',
   },
   {
-    icon: '⚙️',
+    icon: 'bi bi-sliders2',
     title: 'Kelola Layanan Fleksibel',
     desc: 'Atur harga per kilogram atau per satuan (sepatu, selimut, bed cover). Aktifkan atau nonaktifkan sewaktu-waktu.',
   },
   {
-    icon: '👥',
+    icon: 'bi bi-people',
     title: 'Multi Pengguna',
     desc: 'Role Admin dan Kasir dengan akses terpisah. Admin bisa kelola layanan & pengguna, kasir fokus input order.',
   },
   {
-    icon: '🌐',
+    icon: 'bi bi-globe',
     title: 'Berbasis Web, Akses Dari Mana Saja',
     desc: 'Tidak perlu install aplikasi. Buka dari HP, tablet, atau komputer — selama ada internet, bisnis tetap jalan.',
   },
@@ -72,7 +72,7 @@ const plans = [
     ],
     cta: 'Pilih Tahunan',
     highlight: true,
-    badge: '⭐ PALING POPULER',
+    badge: 'PALING POPULER',
   },
   {
     name: '2 Tahun',
@@ -88,7 +88,7 @@ const plans = [
     ],
     cta: 'Pilih 2 Tahun',
     highlight: false,
-    badge: '🔥 PALING HEMAT',
+    badge: 'PALING HEMAT',
   },
 ]
 
@@ -124,7 +124,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-base">🧺</div>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-base"><i className="bi bi-droplet-half" /></div>
             <span className="font-bold text-gray-900">Z Laundry</span>
           </div>
           <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-md hover:border-blue-200 transition-all">
-                <div className="text-3xl mb-4">{f.icon}</div>
+                <div className="text-3xl mb-4 text-blue-600"><i className={f.icon} /></div>
                 <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
@@ -250,7 +250,7 @@ export default function LandingPage() {
                     <div className="w-6 h-6 bg-blue-600 rounded-md" />
                     <div className="text-xs font-bold text-gray-800">Z Laundry</div>
                   </div>
-                  {['📊 Dashboard', '👕 Order & Status'].map((item, i) => (
+                  {['Dashboard', 'Order & Status'].map((item, i) => (
                     <div key={i} className={`text-xs px-2 py-1.5 rounded-md mb-1 ${i === 1 ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-500'}`}>{item}</div>
                   ))}
                 </div>
@@ -319,7 +319,7 @@ export default function LandingPage() {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((f, j) => (
                     <li key={j} className={`flex items-start gap-2.5 text-sm ${plan.highlight ? 'text-blue-50' : 'text-gray-600'}`}>
-                      <span className={`mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-blue-200' : 'text-blue-600'}`}>✓</span>
+                      <i className={`bi bi-check-lg mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-blue-200' : 'text-blue-600'}`} />
                       {f}
                     </li>
                   ))}
@@ -350,7 +350,7 @@ export default function LandingPage() {
                   className="w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
                 >
                   {faq.q}
-                  <span className={`text-gray-400 transition-transform ml-4 flex-shrink-0 ${openFaq === i ? 'rotate-180' : ''}`}>▾</span>
+                  <i className={`bi bi-chevron-down text-gray-400 transition-transform ml-4 flex-shrink-0 ${openFaq === i ? 'rotate-180' : ''}`} />
                 </button>
                 {openFaq === i && (
                   <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
@@ -384,13 +384,13 @@ export default function LandingPage() {
       <footer className="bg-gray-900 text-gray-400 py-10">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm">🧺</div>
+            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm"><i className="bi bi-droplet-half" /></div>
             <span className="font-semibold text-white">Z Laundry</span>
             <span className="text-gray-600">·</span>
             <span className="text-sm">POS Laundry Modern</span>
           </div>
           <div className="text-sm text-center">
-            © 2026 Z Laundry. Dibuat dengan ❤️ untuk pelaku usaha laundry Indonesia.
+            © 2026 Z Laundry. Dibuat dengan <i className="bi bi-heart-fill text-red-500" /> untuk pelaku usaha laundry Indonesia.
           </div>
           <Link href="/login" className="text-sm hover:text-white transition-colors">
             Login Aplikasi →

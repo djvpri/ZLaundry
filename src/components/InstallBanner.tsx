@@ -13,7 +13,7 @@ export default function InstallBanner() {
     <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-50">
       <div className="bg-blue-600 text-white rounded-xl p-4 shadow-lg shadow-blue-200">
         <div className="flex items-start gap-3">
-          <div className="text-2xl">📲</div>
+          <i className="bi bi-phone-fill text-2xl" />
           <div className="flex-1 min-w-0">
             <div className="font-medium text-sm mb-0.5">Install Z Laundry</div>
             <div className="text-xs text-blue-100 mb-3">Tambahkan ke layar utama untuk akses lebih cepat</div>

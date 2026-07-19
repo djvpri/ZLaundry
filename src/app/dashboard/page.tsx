@@ -46,12 +46,12 @@ export default async function DashboardPage() {
   const { totalToday, pendapatanToday, statusMap, recentOrders } = await getDashboardData()
 
   const stats = [
-    { label: 'Order Hari Ini', value: `${totalToday}`, color: 'text-blue-600', icon: '📦' },
-    { label: 'Pendapatan', value: formatRupiah(pendapatanToday), color: 'text-green-600', icon: '💰' },
-    { label: 'Masuk', value: `${statusMap['MASUK'] || 0}`, color: 'text-blue-500', icon: '📥' },
-    { label: 'Proses', value: `${statusMap['PROSES'] || 0}`, color: 'text-yellow-600', icon: '⏳' },
-    { label: 'Selesai', value: `${statusMap['SELESAI'] || 0}`, color: 'text-green-600', icon: '✅' },
-    { label: 'Diambil', value: `${statusMap['DIAMBIL'] || 0}`, color: 'text-gray-500', icon: '📦' },
+    { label: 'Order Hari Ini', value: `${totalToday}`, color: 'text-blue-600', icon: 'bi bi-box-seam' },
+    { label: 'Pendapatan', value: formatRupiah(pendapatanToday), color: 'text-green-600', icon: 'bi bi-cash-coin' },
+    { label: 'Masuk', value: `${statusMap['MASUK'] || 0}`, color: 'text-blue-500', icon: 'bi bi-inbox' },
+    { label: 'Proses', value: `${statusMap['PROSES'] || 0}`, color: 'text-yellow-600', icon: 'bi bi-hourglass-split' },
+    { label: 'Selesai', value: `${statusMap['SELESAI'] || 0}`, color: 'text-green-600', icon: 'bi bi-check-circle' },
+    { label: 'Diambil', value: `${statusMap['DIAMBIL'] || 0}`, color: 'text-gray-500', icon: 'bi bi-bag-check' },
   ]
 
   return (
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
         {stats.map((s, i) => (
           <div key={i} className="card p-3 sm:p-4">
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm sm:text-base">{s.icon}</span>
+              <i className={`${s.icon} text-sm sm:text-base ${s.color}`} />
               <span className="text-[10px] sm:text-xs font-medium text-gray-500 truncate">{s.label}</span>
             </div>
             <div className={`text-sm sm:text-lg font-semibold ${s.color}`}>{s.value}</div>

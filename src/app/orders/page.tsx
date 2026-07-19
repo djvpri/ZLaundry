@@ -215,23 +215,23 @@ export default function OrdersPage() {
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Order & Status</h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             {orders.length} order
-            {isOffline && <span className="ml-2 text-amber-600 font-medium">📱 Offline</span>}
+            {isOffline && <span className="ml-2 text-amber-600 font-medium"><i className="bi bi-wifi-off" /> Offline</span>}
           </p>
         </div>
         <div className="flex gap-2">
           {isOffline && (
-            <button onClick={() => syncNow()} className="btn-secondary text-xs sm:text-sm">🔄 Sync</button>
+            <button onClick={() => syncNow()} className="btn-secondary text-xs sm:text-sm"><i className="bi bi-arrow-repeat" /> Sync</button>
           )}
           {isBluetoothSupported() && (
             <button
               onClick={async () => { const name = await selectPrinter(); if (name) setSavedPrinter(name) }}
               className="btn-secondary text-xs sm:text-sm"
               title={savedPrinter ? `Printer: ${savedPrinter}` : 'Pilih printer Bluetooth'}>
-              🔵 {savedPrinter ? savedPrinter : 'Set Printer'}
+              <i className="bi bi-bluetooth" /> {savedPrinter ? savedPrinter : 'Set Printer'}
             </button>
           )}
           <button className="btn-primary text-xs sm:text-sm" onClick={() => setShowForm(!showForm)}>
-            {showForm ? '✕ Tutup' : '+ Order Baru'}
+            {showForm ? <><i className="bi bi-x-lg" /> Tutup</> : <><i className="bi bi-plus-lg" /> Order Baru</>}
           </button>
         </div>
       </div>
@@ -287,7 +287,7 @@ export default function OrdersPage() {
           <div className="flex gap-3 mt-4 justify-end">
             <button className="btn-secondary" onClick={() => setShowForm(false)}>Batal</button>
             <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? '...' : '💾 Simpan Order'}
+              {loading ? '...' : <><i className="bi bi-save" /> Simpan Order</>}
             </button>
           </div>
         </div>
@@ -352,13 +352,13 @@ export default function OrdersPage() {
                         </button>
                       )}
                       <button onClick={() => handlePrintNota(order.id)}
-                        className="btn-secondary text-xs py-1 px-2">🖨️</button>
+                        className="btn-secondary text-xs py-1 px-2"><i className="bi bi-printer" /></button>
                       {isBluetoothSupported() && (
                         <button
                           onClick={() => handlePrintThermal(order)}
                           disabled={printingOrderId === order.id}
                           className="btn-secondary text-xs py-1 px-2 text-blue-600 disabled:opacity-50">
-                          {printingOrderId === order.id ? '...' : '🔵'}
+                          {printingOrderId === order.id ? '...' : <i className="bi bi-bluetooth" />}
                         </button>
                       )}
                     </div>
@@ -415,14 +415,14 @@ export default function OrdersPage() {
                 )}
                 <button onClick={() => handlePrintNota(order.id)}
                   className="px-3 py-2 text-xs bg-gray-50 text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100">
-                  🖨️
+                  <i className="bi bi-printer" />
                 </button>
                 {isBluetoothSupported() && (
                   <button
                     onClick={() => handlePrintThermal(order)}
                     disabled={printingOrderId === order.id}
                     className="px-3 py-2 text-xs bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 disabled:opacity-50">
-                    {printingOrderId === order.id ? '...' : '🔵'}
+                    {printingOrderId === order.id ? '...' : <i className="bi bi-bluetooth" />}
                   </button>
                 )}
               </div>
