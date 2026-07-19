@@ -93,7 +93,7 @@ export async function GET(
     return new NextResponse(pdfArray, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="nota-${order.orderNumber}.pdf"`,
+        'Content-Disposition': `inline; filename="nota-${order.orderNumber}.pdf"`,
       },
     })
   } catch (err) {

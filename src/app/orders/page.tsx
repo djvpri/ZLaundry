@@ -164,7 +164,7 @@ export default function OrdersPage() {
     if (!navigator.onLine) {
       alert('Cetak nota butuh koneksi internet'); return
     }
-    window.open(`/api/orders/${orderId}/nota`, '_blank')
+    window.open(`/nota/${orderId}`, '_blank')
   }
 
   async function handlePrintThermal(order: Order) {
